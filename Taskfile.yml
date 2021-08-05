@@ -1,0 +1,21 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - cargo build --target=wasm32-unknown-unknown --release
+
+  docker-build:
+    deps: [build]
+    cmds:
+      - md5sum target/wasm32-unknown-unknown/release/hello_wasm.wasm > docker-cache-helper.txt
+      - docker build -t hello_wasm_envoy:latest -f Dockerfile-envoy .
+
+  start:
+    cmds:
+      - docker-compose up --build  -d
+      - echo "visit http://localhost:9211/swagger/index.html"
+
+  stop:
+    cmds:
+      - docker-compose stop

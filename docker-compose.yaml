@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  envoy:
+    image: hello_wasm_envoy:latest
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile-envoy
+    command: /usr/local/bin/envoy -c /etc/envoy.yaml -l debug
+    volumes:
+    - ./runtime:/srv/runtime
+    networks:
+    - envoymesh
+    ports:
+    - 9211:9211
+  backend:
+    image: ghcr.io/tgunsch/httpod:latest-slim
+    networks:
+    - envoymesh
+    ports:
+    - 8080:8080
+networks:
+  envoymesh: {}
