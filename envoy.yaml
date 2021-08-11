@@ -27,12 +27,33 @@ static_resources:
                           route:
                             cluster: local_service
                 http_filters:
+                  - name: envoy.filters.http.jwt_authn
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+                      providers:
+                        provider1:
+                          issuer: demo
+                          local_jwks:
+                            inline_string: "{\"keys\":[{\"use\": \"sig\",\"alg\": \"HS256\",\"kid\": \"test\",\"kty\": \"oct\",\"k\": \"bXktc2VjcmV0LWtleQo=\"}]}"
+                          forward: true
+                      rules:
+                        - match:
+                            prefix: /
+                          requires:
+                            provider_name: provider1
                   - name: envoy.filters.http.wasm
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
                       config:
                         name: "hello_wasm"
                         root_id: "my_root_id"
+                        configuration:
+                          "@type": "type.googleapis.com/google.protobuf.StringValue"
+                          value: |
+                            {
+                              "claim": "sub",
+                              "header": "X-WEBAUTH-USER"
+                            }
                         vm_config:
                           runtime: "envoy.wasm.runtime.v8"
                           vm_id: "my_vm_id"
