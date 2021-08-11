@@ -26,6 +26,8 @@ static_resources:
                             prefix: /
                           route:
                             cluster: local_service
+                  request_headers_to_remove:
+                    - "Authorization"
                 http_filters:
                   - name: envoy.filters.http.jwt_authn
                     typed_config:
